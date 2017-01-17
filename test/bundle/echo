@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+args=(0..ENV['COG_ARGC'].to_i-1).map{|a| ENV["COG_ARGV_#{a}"]}
+puts "JSON"
+puts JSON.dump({output: args.join(" ")})

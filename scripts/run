@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Environment Variables
+#
+# COG_PORT
+# COG_INTEGRATION_USERNAME
+# COG_INTEGRATION_PASSWORD
+# TESTING_IMAGE
+
+# Files
+#
+# /config.yaml
+# /integration.yaml
+
+set -euo pipefail
+
+# This is so we can get plugin_prompt_and_run for nice output
+source /hooks/common.sh
+
+modified_config=/tmp/config.yaml
+config_with_testing_image /config.yaml ${TESTING_IMAGE} > ${modified_config}
+
+# Diff exits with 1 when there are differences; that'd kill this whole script
+set +e
+plugin_prompt_and_run diff /config.yaml ${modified_config}
+set -e
+
+# Need to use "cog" instead of the IP address
+plugin_prompt_and_run wait-for-it.sh cog:${COG_PORT} -s -t 90
+
+# Ensure that bootstrapping has occurred
+bootstrap_wait=30
+for ((i = 1; i <= ${bootstrap_wait}; i += 1))
+do
+    echo "Waiting for bootstrapping to finish..."
+    output=$(cogctl bootstrap --status --host=cog --port=${COG_PORT})
+    if [ "Status: Bootstrapped" == "$output" ]
+    then
+        echo "Done!"
+        break
+    else
+        if [ "$i" == "${bootstrap_wait}" ]
+        then
+            echo "Bootstrapping didn't complete in ${bootstrap_wait} seconds!"
+            exit 1
+        else
+            sleep 1
+        fi
+    fi
+done
+
+plugin_prompt_and_run cogctl bundle install ${modified_config} \
+                      --verbose \
+                      --enable \
+                      --relay-groups=default
+
+# Be real sure the Relay gets it before we start testing
+sleep 10
+
+export COG_INTEGRATION_SERVER=http://cog:${COG_PORT}
+export INTEGRATION_MANIFEST=/integration.yaml
+
+cd /integration
+echo "+++ :sparkles: Integration tests :sparkles:"
+plugin_prompt_and_run rspec --tag integration --format documentation

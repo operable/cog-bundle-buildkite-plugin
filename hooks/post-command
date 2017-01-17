@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -uo pipefail
+
+dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+source "${dir}/common.sh"
+
+remove_bundle_containers(){
+    local bundle_image=$(buildkite-agent meta-data get "operable-bundle-testing-image")
+
+    # TODO: can this cause issues if multiple of these are running on
+    # an agent at a time?
+
+    num_containers=$(docker ps --all --quiet --filter ancestor=${bundle_image} | wc -l)
+    if [ "${num_containers}" -gt "0" ]
+    then
+        echo "Removing the following containers, based on ${bundle_image}:"
+        plugin_prompt_and_run docker ps --all --filter ancestor=${bundle_image}
+
+        docker ps --all --quiet --filter ancestor=${bundle_image} \
+            | xargs docker rm --force
+    fi
+}
+
+remove_compose_containers(){
+    num_containers=$(run_docker_compose ps -q | wc -l)
+    if [ "${num_containers}" -gt "0" ]
+    then
+        run_docker_compose rm --force
+        run_docker_compose down
+    fi
+}
+
+if [[ ! -z ${BUILDKITE_PLUGIN_COG_BUNDLE_TEST:-} ]]
+then
+    echo "--- :docker: :fire: Remove all test containers"
+    remove_bundle_containers
+    remove_compose_containers
+fi

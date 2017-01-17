@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+# Replaces the docker image information in a bundle config file with
+# the given image, sending the altered config to standard out
+#
+#     $ config_with_testing_image config.yaml cogcmd/foo-testing-abcdefg
+
+require 'yaml'
+
+original_file = ARGV[0]
+new_image = ARGV[1]
+image, tag = new_image.split(":")
+
+c = YAML.load(File.read(original_file))
+c['docker']['image'] = image
+c['docker']['tag'] = tag
+
+puts YAML.dump(c)

@@ -1,0 +1,6 @@
+"plugin-testing:echo":
+  - desc: can echo stuff
+    pipeline: plugin-testing:echo foo bar baz
+    input:
+    output:
+      - output: foo bar baz
