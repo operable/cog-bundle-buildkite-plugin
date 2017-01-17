@@ -1,0 +1,7 @@
+{
+  "name": "cog-bundle",
+  "description": "Test Docker-based Cog Bundles in a Cog Server",
+  "author": "Operable, Inc.",
+  "public": true,
+  "requirements": ["docker", "docker-compose"]
+}

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+# shellcheck source=hooks/common.sh
+source "${dir}/common.sh"
+
+########################################################################
+
+## BUILD OR TEST
+
+if [[ ! -z "${BUILDKITE_PLUGIN_COG_BUNDLE_BUILD:-}" ]]; then
+    # shellcheck source=hooks/commands/build.sh
+    source "${dir}/commands/build.sh"
+elif [[ ! -z "${BUILDKITE_PLUGIN_COG_BUNDLE_TEST:-}" ]]; then
+    # shellcheck source=hooks/commands/test.sh
+    source "${dir}/commands/test.sh"
+else
+  echo "+++ Cog Bundle plugin error"
+  echo "No build or test options were specified"
+  exit 1
+fi
