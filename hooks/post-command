@@ -3,21 +3,24 @@
 set -uo pipefail
 
 dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+
+# shellcheck source=hooks/common.sh
 source "${dir}/common.sh"
 
 remove_bundle_containers(){
-    local bundle_image=$(buildkite-agent meta-data get "operable-bundle-testing-image")
+    local bundle_image
+    bundle_image=$(buildkite-agent meta-data get "operable-bundle-testing-image")
 
     # TODO: can this cause issues if multiple of these are running on
     # an agent at a time?
 
-    num_containers=$(docker ps --all --quiet --filter ancestor=${bundle_image} | wc -l)
+    num_containers=$(docker ps --all --quiet --filter ancestor="${bundle_image}" | wc -l)
     if [ "${num_containers}" -gt "0" ]
     then
         echo "Removing the following containers, based on ${bundle_image}:"
-        plugin_prompt_and_run docker ps --all --filter ancestor=${bundle_image}
+        plugin_prompt_and_run docker ps --all --filter ancestor="${bundle_image}"
 
-        docker ps --all --quiet --filter ancestor=${bundle_image} \
+        docker ps --all --quiet --filter ancestor="${bundle_image}" \
             | xargs docker rm --force
     fi
 }
