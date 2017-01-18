@@ -7,8 +7,17 @@ set -eu
 cat <<YAML
 steps:
 
-  - command: .buildkite/scripts/shellcheck.sh -x hooks/command
-    label: ":shell: :white_check_mark: Linting the Shell Scripts"
+  - label: ":shell: Linting"
+    plugins:
+      operable/shellcheck:
+        script:
+          - hooks/command
+          - hooks/commands/build.sh
+          - hooks/commands/test.sh
+          - hooks/common.sh
+          - hooks/post-command
+          - scripts/run
+        opts: -x
 
   - wait
 
@@ -37,7 +46,7 @@ steps:
 YAML
 
 
-for cog in cm/docker-compose-v2
+for cog in master
 do
 cat <<STEP
   - label: ":cogops: cog@${cog}"

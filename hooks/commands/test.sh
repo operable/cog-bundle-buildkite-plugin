@@ -3,13 +3,14 @@
 set -euo pipefail
 
 dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
-plugin_root="$(cd ${dir}/../.. && pwd)"
+plugin_root="$(cd "${dir}"/../.. && pwd)"
 
 TESTING_IMAGE=$(buildkite-agent meta-data get "operable-bundle-testing-image")
 
 # Can be tag, branch, or (complete) SHA
 COG_VERSION=${BUILDKITE_PLUGIN_COG_BUNDLE_COG_VERSION:-master}
-export COG_HOST=$(ifconfig ${INTERFACE:-eth0} | grep -Eo "inet (addr:)?([0-9]*\.){3}[0-9]*" | grep -Eo "([0-9]*\.){3}[0-9]*")
+export COG_HOST
+COG_HOST=$(ifconfig "${INTERFACE:-eth0}" | grep -Eo "inet (addr:)?([0-9]*\.){3}[0-9]*" | grep -Eo "([0-9]*\.){3}[0-9]*")
 export COG_PORT=4000
 
 random_password() {
@@ -17,7 +18,8 @@ random_password() {
 }
 
 export COG_BOOTSTRAP_USERNAME=admin
-export COG_BOOTSTRAP_PASSWORD=$(random_password)
+export COG_BOOTSTRAP_PASSWORD
+COG_BOOTSTRAP_PASSWORD=$(random_password)
 
 echo "--- :github: Fetching docker-compose files for Cog@${COG_VERSION}"
 url_base="https://raw.githubusercontent.com/operable/cog/${COG_VERSION}"
