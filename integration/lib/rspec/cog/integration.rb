@@ -20,7 +20,7 @@ module Cog
         when Net::HTTPSuccess
           JSON.parse(resp.body)["token"]["value"]
         else
-          raise "could not get token"
+          self.report_failure("Could not get token", resp)
         end
       end
     end
@@ -39,7 +39,7 @@ module Cog
         when Net::HTTPSuccess
           JSON.parse(resp.body)["trigger"]
         else
-          raise "could not create trigger"
+          self.report_failure("Could not create trigger", resp)
         end
       end
     end
@@ -57,7 +57,11 @@ module Cog
         when Net::HTTPSuccess
           resp
         else
-          raise "could not delete trigger: #{resp.inspect}"
+          # Don't throw an exception if something fails here; we
+          # create unique trigger names, and run in a disposable
+          # container; cleaning up triggers isn't even strictly
+          # necessary.
+          STDERR.puts("Could not delete trigger: #{uri.inspect}")
         end
       end
     end
@@ -77,10 +81,19 @@ module Cog
         when Net::HTTPSuccess
           JSON.parse(resp.body)
         else
-          # TODO: better output here
-          raise "could not execute trigger"
+          self.report_failure("Could not execute trigger #{invocation_url}",
+                              resp)
         end
       end
+    end
+
+    def self.report_failure(message, resp)
+      STDERR.puts(message)
+      STDERR.puts("Request Body: #{body.to_json.inspect}")
+      STDERR.puts("Response Code: #{resp.code}")
+      STDERR.puts("Response Message: #{resp.message}")
+      STDERR.puts("Response Body: #{resp.body.inspect}")
+      raise message
     end
 
   end
@@ -118,14 +131,11 @@ module Cog
                          end
 
         trigger = trigger(final_pipeline)
-        res = Cog::API.execute_trigger(trigger["invocation_url"])
-
-        Cog::API.delete_trigger(server_address, token, trigger["id"])
-
-
-
-        res
-        #    res["pipeline_output"]
+        begin
+          return Cog::API.execute_trigger(trigger["invocation_url"])
+        ensure
+          Cog::API.delete_trigger(server_address, token, trigger["id"])
+        end
       end
     end
 
