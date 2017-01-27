@@ -79,7 +79,7 @@ module Cog
         resp = http.request(req)
         case resp
         when Net::HTTPSuccess
-          JSON.parse(resp.body)
+          JSON.parse(resp.body)['pipeline_output']
         else
           self.report_failure("Could not execute trigger #{invocation_url}",
                               resp)
