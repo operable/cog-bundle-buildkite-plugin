@@ -73,4 +73,4 @@ export INTEGRATION_MANIFEST=/integration.yaml
 
 cd /integration
 echo "+++ :sparkles: Integration tests :sparkles:"
-plugin_prompt_and_run rspec --tag integration --format documentation
+plugin_prompt_and_run rspec --format documentation

@@ -5,6 +5,8 @@ set -euo pipefail
 dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 plugin_root="$(cd "${dir}"/../.. && pwd)"
 
+DOCKER_API_VERSION="1.24"
+
 TESTING_IMAGE=$(buildkite-agent meta-data get "operable-bundle-testing-image")
 
 # Can be tag, branch, or (complete) SHA
@@ -56,6 +58,7 @@ services:
       - RELAY_DYNAMIC_CONFIG_ROOT=/tmp/relay_config
       - RELAY_LOG_LEVEL=debug
       - RELAY_COG_REFRESH_INTERVAL=1s
+      - DOCKER_API_VERSION=${DOCKER_API_VERSION}
 
   integration:
     build:
