@@ -89,7 +89,7 @@ module Cog
 
     def self.report_failure(message, resp)
       STDERR.puts(message)
-      STDERR.puts("Request Body: #{body.to_json.inspect}")
+      STDERR.puts("Request Body: #{resp.body.to_json.inspect}")
       STDERR.puts("Response Code: #{resp.code}")
       STDERR.puts("Response Message: #{resp.message}")
       STDERR.puts("Response Body: #{resp.body.inspect}")
