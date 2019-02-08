@@ -3,8 +3,6 @@ Buildkite plugin for testing Cog Bundles in a Cog Server
 
 [![Build status](https://badge.buildkite.com/be17ba01fa3d366cea89f2f28bce33901ed8220d93943bb8a4.svg?branch=master)](https://buildkite.com/operable/cog-bundle-buildkite-plugin)
 
-**NOTE: Plugins only work with the as yet unlreleased 3.0 version of the Buildkite Agent!**
-
 **NOTE: This plugin is a work-in-progress. We use it internally at Operable to test our bundles. However, it may still blow up your systems; use at your own discretion!**
 
 This plugin provides the following actions:
@@ -42,26 +40,26 @@ buildkite-agent meta-data get "operable-bundle-testing-image")
 - steps:
   - label: Build a Cog Bundle image
     plugins:
-      operable/cog-bundle:
-        build: config.yaml
+      - operable/cog-bundle:
+          build: config.yaml
 
   - label: Build a Cog Bundle image with a custom Dockerfile
      plugins:
-       operable/cog-bundle:
-         build: config.yaml
-         dockerfile: Dockerfile.cog
+       - operable/cog-bundle:
+           build: config.yaml
+           dockerfile: Dockerfile.cog
 
   - label: Build a Cog Bundle Image with custom tag
     plugins:
-      operable/cog-bundle:
-        build: config.yaml
-        tag: mycompany/my-bundle:1.0.0-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT}
+      - operable/cog-bundle:
+          build: config.yaml
+          tag: mycompany/my-bundle:1.0.0-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT}
 
   - label: Build image, but don't push
     plugins:
-      operable/cog-bundle:
-        build: config.yaml
-        push: "false" # TODO: Shouldn't need to be quoted
+      - operable/cog-bundle:
+          build: config.yaml
+          push: "false" # TODO: Shouldn't need to be quoted
 ```
 
 # `test`
@@ -82,10 +80,10 @@ Load the bundle into a live Cog server and run integration tests. Tests are spec
 
   - label: Test against Cog
     plugins:
-      operable/cog-bundle#${BUILDKITE_COMMIT}:
-        test: integration.yaml
-        cog-version: "v1.0.0-beta.1"
-        config: config.yaml
+      - operable/cog-bundle#${BUILDKITE_COMMIT}:
+          test: integration.yaml
+          cog-version: "v1.0.0-beta.1"
+          config: config.yaml
 ```
 
 Note: by dynamically generating your pipeline definitions, you can loop over a list of several different Cog versions, thereby testing your bundle against each of them.
